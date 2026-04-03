@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Translator - Login</title>
+  <link rel="stylesheet" href="css/login.css" />
+</head>
+<body>
+
+  <div class="auth-screen">
+    <div class="logo">💬</div>
+    <h2>Chat Translator</h2>
+    <p>Chat with anyone in any language</p>
+
+    <div class="auth-tabs">
+      <button class="active" id="loginTab" onclick="showTab('login')">Login</button>
+      <button id="registerTab" onclick="showTab('register')">Register</button>
+    </div>
+
+    <div id="errorMsg" class="error-msg"></div>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <input id="loginUsername" placeholder="Username" />
+      <input id="loginPassword" type="password" placeholder="Password" />
+      <button class="btn" onclick="login()">Login →</button>
+    </div>
+
+    <!-- Register Form -->
+    <div id="registerForm" style="display:none;">
+      <input id="regUsername" placeholder="Username" />
+      <input id="regPassword" type="password" placeholder="Password" />
+      <select id="regLang">
+        <option value="en">🇬🇧 English</option>
+        <option value="bn">🇧🇩 বাংলা</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="fr">🇫🇷 French</option>
+        <option value="ar">🇸🇦 Arabic</option>
+        <option value="hi">🇮🇳 Hindi</option>
+        <option value="zh-cn">🇨🇳 Chinese</option>
+        <option value="es">🇪🇸 Spanish</option>
+      </select>
+      <button class="btn" onclick="register()">Register →</button>
+    </div>
+  </div>
+
+  <script src="js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.auth-screen {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  text-align: center;
+  width: 360px;
+}
+
+.auth-screen .logo { font-size: 48px; margin-bottom: 12px; }
+
+.auth-screen h2 {
+  color: #075e54;
+  margin-bottom: 4px;
+  font-size: 22px;
+}
+
+.auth-screen p {
+  color: #999;
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.auth-tabs button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.auth-tabs button.active {
+  background: #075e54;
+  color: white;
+  font-weight: bold;
+}
+
+.auth-screen input,
+.auth-screen select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  outline: none;
+}
+
+.auth-screen input:focus { border-color: #075e54; }
+
+.auth-screen .btn {
+  width: 100%;
+  padding: 12px;
+  background: #075e54;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.auth-screen .btn:hover { background: #064d45; }
+
+.error-msg {
+  color: #e53935;
+  font-size: 13px;
+  margin-bottom: 10px;
+  display: none;
+}

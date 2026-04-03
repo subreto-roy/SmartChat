@@ -4,176 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Chat Translator</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; }
-
-    /* Join Screen */
-    .join-screen { background: white; border-radius: 12px; padding: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; width: 340px; }
-    .join-screen h2 { color: #075e54; margin-bottom: 8px; font-size: 22px; }
-    .join-screen p { color: #999; font-size: 13px; margin-bottom: 24px; }
-    .join-screen input, .join-screen select { width: 100%; padding: 11px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 12px; outline: none; }
-    .join-screen button { width: 100%; padding: 12px; background: #075e54; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: bold; }
-    .join-screen button:hover { background: #064d45; }
-
-    /* Chat Screen */
-    .chat-screen { display: none; width: 420px; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
-    .chat-header { background: #075e54; color: white; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
-    .chat-header .avatar { width: 38px; height: 38px; border-radius: 50%; background: #25d366; display: flex; align-items: center; justify-content: flex-end; font-size: 18px; }
-    .chat-header .info h2 { font-size: 16px; }
-    .chat-header .info p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
-
-    #messages { height: 380px; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; background: #e5ddd5; }
-
-    .message { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; line-height: 1.4; position: relative; }
-    .message.mine { background: #dcf8c6; align-self: flex-end; border-bottom-right-radius: 2px; }
-    .message.other { background: white; align-self: flex-start; border-bottom-left-radius: 2px; }
-    .message .sender { font-size: 11px; font-weight: bold; color: #075e54; margin-bottom: 3px; }
-    .message .text { word-break: break-word; }
-    .message .meta { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 4px; }
-    .message .original { font-size: 10px; color: #999; font-style: italic; }
-    .message .time { font-size: 10px; color: #999; white-space: nowrap; align-self: flex-end; }
-
-    .system-msg { text-align: center; font-size: 12px; color: #888; background: rgba(0,0,0,0.06); padding: 4px 12px; border-radius: 12px; align-self: center; }
-
-    .typing-indicator { font-size: 12px; color: #888; padding: 4px 8px; min-height: 22px; }
-
-    .input-area { display: flex; padding: 10px 12px; border-top: 1px solid #eee; gap: 8px; align-items: center; }
-    .input-area input { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 20px; font-size: 14px; outline: none; }
-    .input-area button { background: #075e54; color: white; border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 18px; cursor: pointer; flex-shrink: 0; }
-    .input-area button:hover { background: #064d45; }
-  </style>
+  <link rel="stylesheet" href="css/chat.css" />
 </head>
 <body>
 
-  <!-- Join Screen -->
-  <div class="join-screen" id="joinScreen">
-    <h2>💬 Chat Translator</h2>
-    <p>Enter your name and choose your language</p>
-    <input id="joinName" placeholder="Your name" maxlength="20" />
-    <select id="joinLang">
-      <option value="en">🇬🇧 English</option>
-      <option value="bn">🇧🇩 বাংলা</option>
-      <option value="de">🇩🇪 Deutsch</option>
-      <option value="fr">🇫🇷 French</option>
-      <option value="ar">🇸🇦 Arabic</option>
-      <option value="hi">🇮🇳 Hindi</option>
-      <option value="zh-cn">🇨🇳 Chinese</option>
-      <option value="es">🇪🇸 Spanish</option>
-    </select>
-    <button id="joinBtn">Join Chat →</button>
-  </div>
-
-  <!-- Chat Screen -->
-  <div class="chat-screen" id="chatScreen">
-    <div class="chat-header">
-      <div class="avatar">💬</div>
-      <div class="info">
-        <h2>Chat Translator</h2>
-        <p id="headerLang">Language: English</p>
+  <div class="app" id="app">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="left">
+          <h2>💬 Chat Translator</h2>
+          <p id="myNameDisplay"></p>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+      <div class="search-box">
+        <input id="searchInput" placeholder="🔍 Search contacts..." />
+      </div>
+      <div class="contacts" id="contactList">
+        <div class="no-contacts">No users online yet...</div>
       </div>
     </div>
-    <div id="messages"></div>
-    <div class="typing-indicator" id="typingIndicator"></div>
-    <div class="input-area">
-      <input id="msgInput" placeholder="Type a message..." autocomplete="off" />
-      <button id="sendBtn">➤</button>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+      <div class="chat-placeholder" id="chatPlaceholder">
+        <div class="icon">💬</div>
+        <p>Select a contact to start chatting</p>
+      </div>
+      <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+          <div class="avatar" id="chatAvatar"></div>
+          <div class="info">
+            <h3 id="chatName"></h3>
+            <p id="chatStatus">online · auto-translating</p>
+          </div>
+        </div>
+        <div id="messages"></div>
+        <div class="typing-indicator" id="typingIndicator"></div>
+        <div class="input-area">
+          <input id="msgInput" placeholder="Type a message..." autocomplete="off" />
+          <button id="sendBtn">➤</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-
-    let myName = "";
-    let myLang = "en";
-    let typingTimeout;
-
-    const langNames = {
-      en: "English", bn: "বাংলা", de: "Deutsch",
-      fr: "French", ar: "Arabic", hi: "Hindi",
-      "zh-cn": "Chinese", es: "Spanish"
-    };
-
-    // Join
-    document.getElementById("joinBtn").addEventListener("click", () => {
-      const name = document.getElementById("joinName").value.trim();
-      const lang = document.getElementById("joinLang").value;
-      if (!name) { alert("Please enter your name!"); return; }
-
-      myName = name;
-      myLang = lang;
-
-      socket.emit("set language", lang);
-      socket.emit("user joined", name);
-
-      document.getElementById("joinScreen").style.display = "none";
-      document.getElementById("chatScreen").style.display = "block";
-      document.getElementById("headerLang").textContent = `Language: ${langNames[lang]}`;
-    });
-
-    // Send message
-    function sendMessage() {
-      const text = document.getElementById("msgInput").value.trim();
-      if (!text) return;
-      socket.emit("chat message", { user: myName, text });
-      socket.emit("stop typing");
-      document.getElementById("msgInput").value = "";
-    }
-
-    document.getElementById("sendBtn").addEventListener("click", sendMessage);
-    document.getElementById("msgInput").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
-
-    // Typing indicator
-    document.getElementById("msgInput").addEventListener("input", () => {
-      socket.emit("typing", myName);
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(() => socket.emit("stop typing"), 1500);
-    });
-
-    // Receive message
-    socket.on("chat message", (msg) => {
-      const messages = document.getElementById("messages");
-      const isMe = msg.user === myName;
-
-      const div = document.createElement("div");
-      div.classList.add("message", isMe ? "mine" : "other");
-
-      const showOriginal = msg.original && msg.original !== msg.text;
-
-      div.innerHTML = `
-        ${!isMe ? `<div class="sender">${msg.user}</div>` : ""}
-        <div class="text">${msg.text}</div>
-        <div class="meta">
-          ${showOriginal ? `<div class="original">📝 ${msg.original}</div>` : `<div></div>`}
-          <div class="time">${msg.time}</div>
-        </div>
-      `;
-
-      messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
-    });
-
-    // System messages
-    socket.on("system message", (msg) => {
-      const messages = document.getElementById("messages");
-      const div = document.createElement("div");
-      div.classList.add("system-msg");
-      div.textContent = msg;
-      messages.appendChild(div);
-      messages.scrollTop = messages.scrollHeight;
-    });
-
-    // Typing indicator
-    socket.on("typing", (username) => {
-      document.getElementById("typingIndicator").textContent = `${username} is typing...`;
-    });
-
-    socket.on("stop typing", () => {
-      document.getElementById("typingIndicator").textContent = "";
-    });
-  </script>
+  <script src="js/chat.js"></script>
 </body>
 </html>
