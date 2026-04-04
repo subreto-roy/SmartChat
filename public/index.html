@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Chat Translator</title>
+  <title>SmartChat</title>
+  <link rel="stylesheet" href="css/index.css" />
   <link rel="stylesheet" href="css/chat.css" />
 </head>
 <body>
@@ -13,7 +14,7 @@
     <div class="sidebar">
       <div class="sidebar-header">
         <div class="left">
-          <h2>💬 Chat Translator</h2>
+          <h2>SmartChat</h2>
           <p id="myNameDisplay"></p>
         </div>
         <button class="logout-btn" onclick="logout()">Logout</button>
@@ -22,7 +23,7 @@
         <input id="searchInput" placeholder="🔍 Search contacts..." />
       </div>
       <div class="contacts" id="contactList">
-        <div class="no-contacts">No users online yet...</div>
+        <div class="no-contacts">No users found...</div>
       </div>
     </div>
 
@@ -39,6 +40,7 @@
             <h3 id="chatName"></h3>
             <p id="chatStatus">online · auto-translating</p>
           </div>
+          <button id="callBtn" title="Voice Call">📞</button>
         </div>
         <div id="messages"></div>
         <div class="typing-indicator" id="typingIndicator"></div>
@@ -49,6 +51,48 @@
       </div>
     </div>
   </div>
+
+  <!-- Call Overlay -->
+  <div id="callOverlay">
+    <div class="call-box">
+
+      <!-- Outgoing Call -->
+      <div id="outgoingCall" style="display:none;">
+        <div class="call-avatar">📞</div>
+        <h3>Calling...</h3>
+        <p>Waiting for answer</p>
+        <div class="call-actions">
+          <button class="btn-reject" id="cancelCallBtn" title="Cancel">📵</button>
+        </div>
+      </div>
+
+      <!-- Incoming Call -->
+      <div id="incomingCall" style="display:none;">
+        <div class="call-avatar">📞</div>
+        <h3 id="callCallerName"></h3>
+        <p>Incoming voice call...</p>
+        <div class="call-actions">
+          <button class="btn-accept" id="acceptCallBtn" title="Accept">📞</button>
+          <button class="btn-reject" id="rejectCallBtn" title="Reject">📵</button>
+        </div>
+      </div>
+
+      <!-- Active Call -->
+      <div id="activeCall" style="display:none;">
+        <div class="call-avatar">🎙️</div>
+        <h3 id="activeCallName">On Call</h3>
+        <div class="call-duration" id="callDuration">00:00</div>
+        <div class="call-actions">
+          <button class="btn-end" id="endCallBtn" title="End Call">📵</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Audio Elements -->
+  <audio id="localAudio" autoplay muted></audio>
+  <audio id="remoteAudio" autoplay></audio>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="js/chat.js"></script>

@@ -4,6 +4,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const Database = require("better-sqlite3");
 const bcrypt = require("bcryptjs");
+const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -34,7 +35,7 @@ db.exec(`
   );
 `);
 
-const onlineUsers = {}; // socketId -> { username, lang }
+const onlineUsers = {};
 
 const LANGUAGES = {
   en: "English",
@@ -63,11 +64,8 @@ async function translateText(text, targetLang) {
 }
 
 function broadcastUserList() {
- 
   const allRegistered = db.prepare("SELECT username FROM users").all();
-
   const userList = allRegistered.map(u => {
-   
     const onlineEntry = Object.entries(onlineUsers).find(([id, o]) => o.username === u.username);
     return {
       id: onlineEntry ? onlineEntry[0] : null,
@@ -75,7 +73,6 @@ function broadcastUserList() {
       online: !!onlineEntry,
     };
   });
-
   io.emit("user list", userList);
 }
 
@@ -83,34 +80,43 @@ function getHistory(user1, user2) {
   return db.prepare(`
     SELECT * FROM messages
     WHERE (from_user = ? AND to_user = ?) OR (from_user = ? AND to_user = ?)
-    ORDER BY created_at ASC
+    ORDER BY id ASC
   `).all(user1, user2, user2, user1);
 }
 
-// REST API - Register
+function getLastMessages(username) {
+  return db.prepare(`
+    SELECT m.* FROM messages m
+    INNER JOIN (
+      SELECT
+        CASE WHEN from_user = ? THEN to_user ELSE from_user END as partner,
+        MAX(id) as max_id
+      FROM messages
+      WHERE from_user = ? OR to_user = ?
+      GROUP BY partner
+    ) latest ON m.id = latest.max_id
+    ORDER BY m.id DESC
+  `).all(username, username, username);
+}
+
+// REST API
 app.post("/register", async (req, res) => {
   const { username, password, lang } = req.body;
   if (!username || !password) return res.json({ success: false, message: "Username and password required" });
-
   const existing = db.prepare("SELECT * FROM users WHERE username = ?").get(username);
   if (existing) return res.json({ success: false, message: "Username already taken" });
-
   const hashed = bcrypt.hashSync(password, 10);
   db.prepare("INSERT INTO users (username, password, lang) VALUES (?, ?, ?)").run(username, hashed, lang || "en");
   res.json({ success: true });
 });
 
-// REST API - Login
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.json({ success: false, message: "Username and password required" });
-
   const user = db.prepare("SELECT * FROM users WHERE username = ?").get(username);
   if (!user) return res.json({ success: false, message: "User not found" });
-
   const valid = bcrypt.compareSync(password, user.password);
   if (!valid) return res.json({ success: false, message: "Wrong password" });
-
   res.json({ success: true, username: user.username, lang: user.lang });
 });
 
@@ -133,11 +139,16 @@ io.on("connection", (socket) => {
     socket.emit("chat history", { withUsername, messages: history });
   });
 
+  socket.on("load last messages", () => {
+    const me = onlineUsers[socket.id];
+    if (!me) return;
+    const lastMsgs = getLastMessages(me.username);
+    socket.emit("last messages", lastMsgs);
+  });
+
   socket.on("typing", ({ toId }) => {
     const from = onlineUsers[socket.id];
-    if (from) {
-      io.to(toId).emit("typing", { fromId: socket.id, username: from.username });
-    }
+    if (from) io.to(toId).emit("typing", { fromId: socket.id, username: from.username });
   });
 
   socket.on("stop typing", ({ toId }) => {
@@ -150,9 +161,7 @@ io.on("connection", (socket) => {
     if (!sender) return;
 
     const timestamp = new Date().toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
+      hour: "2-digit", minute: "2-digit", hour12: false,
     });
 
     let receiverText = text;
@@ -162,13 +171,6 @@ io.on("connection", (socket) => {
       } catch (e) {
         console.log("Translation error:", e.message);
       }
-    }
-
-    let senderText = text;
-    try {
-      senderText = await translateText(text, sender.lang);
-    } catch (e) {
-      console.log("Translation error:", e.message);
     }
 
     db.prepare(`
@@ -187,15 +189,56 @@ io.on("connection", (socket) => {
       });
     }
 
+    // Sender নিজে যা লিখেছে সেটাই দেখবে
     socket.emit("private message", {
       fromId: socket.id,
       toId,
       username: sender.username,
-      text: senderText,
+      text: text,
       original: text,
       time: timestamp,
     });
   });
+
+  // ── CALLING ──────────────────────────────────────────
+
+  socket.on("call user", ({ toId }) => {
+    const caller = onlineUsers[socket.id];
+    if (!caller) return;
+    const callId = uuidv4();
+    io.to(toId).emit("incoming call", {
+      callId,
+      fromId: socket.id,
+      username: caller.username,
+    });
+    socket.emit("call initiated", { callId, toId });
+  });
+
+  socket.on("call accepted", ({ callId, toId }) => {
+    io.to(toId).emit("call accepted", { callId, fromId: socket.id });
+  });
+
+  socket.on("call rejected", ({ toId }) => {
+    io.to(toId).emit("call rejected");
+  });
+
+  socket.on("webrtc offer", ({ toId, offer }) => {
+    io.to(toId).emit("webrtc offer", { fromId: socket.id, offer });
+  });
+
+  socket.on("webrtc answer", ({ toId, answer }) => {
+    io.to(toId).emit("webrtc answer", { fromId: socket.id, answer });
+  });
+
+  socket.on("webrtc ice candidate", ({ toId, candidate }) => {
+    io.to(toId).emit("webrtc ice candidate", { fromId: socket.id, candidate });
+  });
+
+  socket.on("end call", ({ toId }) => {
+    io.to(toId).emit("call ended");
+  });
+
+  // ─────────────────────────────────────────────────────
 
   socket.on("disconnect", () => {
     const user = onlineUsers[socket.id];

@@ -1,0 +1,68 @@
+
+    /* Call Overlay */
+    #callOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .call-box {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      width: 300px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .call-box .call-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #075e54;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .call-box h3 { font-size: 20px; color: #111; margin-bottom: 6px; }
+    .call-box p { font-size: 13px; color: #999; margin-bottom: 28px; }
+    .call-box .call-duration { font-size: 22px; font-weight: bold; color: #075e54; margin-bottom: 24px; }
+    .call-actions { display: flex; justify-content: center; gap: 20px; }
+    .call-actions button {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-accept { background: #25d366; color: white; }
+    .btn-accept:hover { background: #1da851; }
+    .btn-reject, .btn-end { background: #e53935; color: white; }
+    .btn-reject:hover, .btn-end:hover { background: #c62828; }
+
+    /* Call button in header */
+    #callBtn {
+      margin-left: auto;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 16px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    #callBtn:hover { background: rgba(255,255,255,0.3); }
